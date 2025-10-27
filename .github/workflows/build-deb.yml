@@ -9,12 +9,24 @@ on:
 
 jobs:
   build-deb:
-    name: Build on ${{ matrix.distro }}
-    runs-on: ubuntu-latest
+    name: Build on ${{ matrix.distro }} ${{ matrix.arch }}
+    runs-on: ${{ matrix.runs_on }}
     strategy:
       fail-fast: false
       matrix:
-        distro: [ 'bookworm', 'trixie' ]
+        include:
+          - distro: 'bookworm'
+            arch: 'amd64'
+            runs_on: 'ubuntu-latest'
+          - distro: 'trixie'
+            arch: 'amd64'
+            runs_on: 'ubuntu-latest'
+          - distro: 'bookworm'
+            arch: 'arm64'
+            runs_on: 'ubuntu-22.04-arm64'
+          - distro: 'trixie'
+            arch: 'arm64'
+            runs_on: 'ubuntu-22.04-arm64'
     container:
       image: debian:${{ matrix.distro }}
     steps:
@@ -33,6 +45,20 @@ jobs:
             libogg-dev libvorbis-dev libflac-dev \
             libasound2-dev libpulse-dev libjack-dev libsamplerate0-dev
 
+      - name: Set Debian version per distro
+        env:
+          DEBFULLNAME: CI Builder
+          DEBEMAIL: ci@example.com
+        working-directory: darkice/trunk
+        run: |
+          set -eu
+          BASE_VER=$(dpkg-parsechangelog -S Version)
+          # Strip any existing ~suffix to avoid stacking distro suffixes
+          BASE_VER=${BASE_VER%%~*}
+          DIST="${{ matrix.distro }}"
+          NEW_VER="${BASE_VER}~${DIST}1"
+          dch -v "$NEW_VER" -D "$DIST" -m "CI build for $DIST" --force-distribution
+
       - name: Build Debian package
         working-directory: darkice/trunk
         run: |
@@ -48,5 +74,41 @@ jobs:
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: darkice-${{ matrix.distro }}-deb
+          name: darkice-${{ matrix.distro }}-${{ matrix.arch }}-deb
           path: artifacts/
+
+  release:
+    name: Publish GitHub Release
+    needs: build-deb
+    if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags/')
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Download artifacts
+        uses: actions/download-artifact@v4
+        with:
+          pattern: darkice-*-deb
+          merge-multiple: true
+          path: artifacts
+
+      - name: Prepare release files (exclude debug packages)
+        run: |
+          set -e
+          mkdir -p release
+          # Copy only non-debug .deb files; exclude dbgsym and -dbg packages and .ddeb
+          find artifacts -type f -name '*.deb' \
+            ! -name '*dbgsym*' \
+            ! -name '*-dbg_*' \
+            ! -name '*.ddeb' \
+            -exec cp -t release {} +
+          echo "Files to release:" && ls -l release || true
+
+      - name: Create GitHub Release and upload assets
+        uses: softprops/action-gh-release@v2
+        with:
+          files: release/*.deb
+          draft: false
+          prerelease: false
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
