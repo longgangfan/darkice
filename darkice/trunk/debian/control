@@ -1,0 +1,16 @@
+Source: darkice
+Section: sound
+Priority: optional
+Maintainer: DarkIce Maintainers <maintainers@example.com>
+Build-Depends: debhelper-compat (= 13), autoconf, automake, libtool, pkg-config, libogg-dev, libvorbis-dev, libflac-dev, libasound2-dev, libpulse-dev, libjack-dev, libsamplerate0-dev
+Standards-Version: 4.6.2
+Homepage: https://github.com/longgangfan/darkice
+
+Package: darkice
+Architecture: any
+Depends: ${shlibs:Depends}, ${misc:Depends}, adduser
+Recommends: icecast2
+Description: Live audio streamer (Ogg Vorbis, Opus, FLAC, MP3) for Icecast/Shoutcast
+ DarkIce captures audio from a sound card, encodes it into formats such as
+ Ogg Vorbis, Opus, FLAC or MP3 and streams to Icecast or Shoutcast servers.
+ This build enables Ogg Vorbis and FLAC support out of the box.

@@ -1,0 +1,21 @@
+[Unit]
+Description=DarkIce audio streamer
+Documentation=man:darkice(1)
+After=network-online.target sound.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=darkice
+Group=audio
+ExecStart=/usr/bin/darkice -c /etc/darkice.cfg
+Restart=on-failure
+RestartSec=5s
+Nice=5
+NoNewPrivileges=true
+ProtectSystem=full
+ProtectHome=true
+PrivateTmp=true
+
+[Install]
+WantedBy=multi-user.target

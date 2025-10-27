@@ -1,0 +1,52 @@
+name: Build Debian packages
+
+on:
+  push:
+    branches: [ master ]
+    tags: [ 'v*', 'darkice-*' ]
+  pull_request:
+    branches: [ master ]
+
+jobs:
+  build-deb:
+    name: Build on ${{ matrix.distro }}
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        distro: [ 'bookworm', 'trixie' ]
+    container:
+      image: debian:${{ matrix.distro }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install build dependencies
+        run: |
+          set -e
+          apt-get update
+          DEBIAN_FRONTEND=noninteractive apt-get install -y \
+            build-essential \
+            autoconf automake libtool pkg-config \
+            devscripts debhelper \
+            git ca-certificates \
+            libogg-dev libvorbis-dev libflac-dev \
+            libasound2-dev libpulse-dev libjack-dev libsamplerate0-dev
+
+      - name: Build Debian package
+        working-directory: darkice/trunk
+        run: |
+          set -e
+          dpkg-buildpackage -us -uc -b
+
+      - name: Collect artifacts
+        run: |
+          mkdir -p artifacts
+          shopt -s nullglob
+          for f in darkice/*.{deb,buildinfo,changes}; do cp "$f" artifacts/ || true; done
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: darkice-${{ matrix.distro }}-deb
+          path: artifacts/

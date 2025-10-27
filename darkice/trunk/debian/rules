@@ -1,0 +1,18 @@
+#!/usr/bin/make -f
+
+export DEB_BUILD_MAINT_OPTIONS = hardening=+all
+
+%:
+	dh $@
+
+override_dh_auto_configure:
+	autoreconf -fi
+	dh_auto_configure -- \
+	  --prefix=/usr \
+	  --sysconfdir=/etc \
+	  --with-vorbis=yes \
+	  --with-flac=yes \
+	  --with-alsa=check \
+	  --with-pulseaudio=check \
+	  --with-jack=check \
+	  --with-samplerate=check

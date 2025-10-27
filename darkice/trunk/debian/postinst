@@ -1,0 +1,21 @@
+#!/bin/sh
+set -e
+
+case "$1" in
+    configure)
+        # Create a dedicated system user if it doesn't exist
+        if ! id -u darkice >/dev/null 2>&1; then
+            adduser --system --group --no-create-home --home /nonexistent --disabled-login --shell /usr/sbin/nologin darkice || true
+        fi
+        # Ensure the user is in the audio group for device access
+        if getent group audio >/dev/null 2>&1; then
+            if ! id -nG darkice | grep -q '\baudio\b'; then
+                usermod -a -G audio darkice || true
+            fi
+        fi
+    ;;
+esac
+
+#DEBHELPER#
+
+exit 0
