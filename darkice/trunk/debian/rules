@@ -12,7 +12,7 @@ override_dh_auto_configure:
 	  --sysconfdir=/etc \
 	  --with-vorbis=yes \
 	  --with-flac=yes \
-	  --with-alsa=check \
-	  --with-pulseaudio=check \
-	  --with-jack=check \
-	  --with-samplerate=check
+	  --with-alsa=yes \
+	  --with-pulseaudio=no \
+	  --with-jack=no \
+	  --with-samplerate=no

@@ -40,10 +40,10 @@ jobs:
             devscripts debhelper \
             crossbuild-essential-${{ matrix.arch }} \
             libogg-dev:$ARCH libvorbis-dev:$ARCH libflac-dev:$ARCH \
-            libasound2-dev:$ARCH libpulse-dev:$ARCH libjack-dev:$ARCH libsamplerate0-dev:$ARCH \
+            libasound2-dev:$ARCH \
             libc6:$ARCH libgcc-s1:$ARCH libstdc++6:$ARCH zlib1g:$ARCH \
             libogg0:$ARCH libvorbis0a:$ARCH libvorbisenc2:$ARCH libflac12:$ARCH \
-            libasound2:$ARCH libpulse0:$ARCH libpulse-simple0:$ARCH libjack-jackd2-0:$ARCH libsamplerate0:$ARCH
+            libasound2:$ARCH
 
       - name: Checkout
         uses: actions/checkout@v4
