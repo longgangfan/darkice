@@ -57,7 +57,7 @@ jobs:
           BASE_VER=${BASE_VER%%~*}
           DIST="${{ matrix.distro }}"
           NEW_VER="${BASE_VER}~${DIST}1"
-          dch -v "$NEW_VER" -D "$DIST" -m "CI build for $DIST" --force-distribution
+          dch -v "$NEW_VER" -D "$DIST" -m "CI build for $DIST" --force-distribution -b
 
       - name: Build Debian package
         working-directory: darkice/trunk
