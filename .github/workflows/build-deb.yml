@@ -41,9 +41,9 @@ jobs:
 
       - name: Collect artifacts
         run: |
+          set -e
           mkdir -p artifacts
-          shopt -s nullglob
-          for f in darkice/*.{deb,buildinfo,changes}; do cp "$f" artifacts/ || true; done
+          find darkice -maxdepth 1 -type f \( -name '*.deb' -o -name '*.buildinfo' -o -name '*.changes' \) -exec cp -t artifacts {} + || true
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
